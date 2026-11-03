@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Crop & weed detection{% endblock %}
+{% block breadcrumb %}Crop & weed detection{% endblock %}
+{% block content %}
+<div class="page-intro"><div class="eyebrow">MODULE 02 · COMPUTER VISION</div><h1>Crop & weed detection</h1><p>Upload a field image for analysis using your custom YOLO model.</p></div>
+<div class="detection-layout">
+  <section class="panel">
+    <div class="panel-header"><div class="module-symbol amber">02</div><div><div class="eyebrow">IMAGE ANALYSIS</div><h2>Upload field image</h2></div></div>
+    <p class="panel-description">Use a clear photo of the crop rows for best results. Supported formats: JPG, PNG, WEBP.</p>
+    <form method="post" enctype="multipart/form-data" class="upload-form">
+      <label class="drop-zone" for="image" id="drop-zone"><span class="upload-icon">↑</span><strong>Choose an image to upload</strong><span>Browse your computer · JPG, PNG, WEBP</span><img id="image-preview" alt="Selected image preview" hidden></label>
+      <input id="image" type="file" name="image" accept=".png,.jpg,.jpeg,.webp" required>
+      <button class="button button-primary full-button" type="submit">Analyze field image <span>→</span></button>
+    </form>
+    {% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+    <div class="panel-note"><span>ⓘ</span><p>The application will only report detections when the trained model file <code>models/crop_weed_best.pt</code> is present.</p></div>
+  </section>
+  <section class="panel">
+    <div class="panel-header"><div><div class="eyebrow">HOW IT WORKS</div><h2>Detection workflow</h2></div></div>
+    <div class="workflow-list"><div class="workflow-step"><span>1</span><div><strong>Upload image</strong><p>Select a clear field photo from your device.</p></div></div><div class="workflow-step"><span>2</span><div><strong>AI analysis</strong><p>The trained YOLO model locates the classes it has learned.</p></div></div><div class="workflow-step"><span>3</span><div><strong>Review results</strong><p>View the annotated image, confidence and bounding-box coordinates.</p></div></div></div>
+    <div class="model-status"><span class="status-dot {% if detector_ready %}status-ready{% endif %}"></span><div><strong>{% if detector_ready %}Detection model found{% else %}Detection model not installed{% endif %}</strong><p>{% if detector_ready %}Ready to process uploaded images.{% else %}Train the custom model before running detection.{% endif %}</p></div></div>
+  </section>
+</div>
+{% if result_image %}
+<section class="panel detection-results"><div class="panel-header"><div><div class="eyebrow">ANALYSIS OUTPUT</div><h2>Detection results</h2></div></div><img class="preview result-preview" src="{{ url_for('static', filename=result_image) }}" alt="Image with detected objects">
+  {% if detections %}<div class="table-wrap"><table><thead><tr><th>Detected class</th><th>Confidence</th><th>Bounding box (x1, y1, x2, y2)</th></tr></thead><tbody>{% for d in detections %}<tr><td>{{ d.label }}</td><td><span class="confidence">{{ d.confidence }}%</span></td><td>{{ d.x1 }}, {{ d.y1 }}, {{ d.x2 }}, {{ d.y2 }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p>No objects detected above the confidence threshold.</p>{% endif %}
+</section>
+{% endif %}
+<details class="dataset-details"><summary>YOLO dataset setup instructions</summary><div><p>Expected layout under <code>dataset/weed_detection/</code>:</p><pre>images/train/   images/val/
+labels/train/   labels/val/
+data.yaml</pre><p>Each image needs a matching YOLO label text file. Each label row follows: <code>class_id x_center y_center width height</code> with normalized values from 0 to 1. Configure the class names in <code>data.yaml</code>, then run <code>python train_yolo.py</code>.</p></div></details>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Overview{% endblock %}
+{% block breadcrumb %}Overview{% endblock %}
+{% block content %}
+<section class="welcome-banner">
+  <div class="welcome-copy">
+    <div class="eyebrow light"><span class="eyebrow-line"></span> INTELLIGENCE FOR EVERY FIELD</div>
+    <h1>Smarter decisions.<br><em>Healthier harvests.</em></h1>
+    <p>Bring agricultural data and field-image analysis into one simple workspace.</p>
+    <a class="button button-light" href="#production">Explore production forecast <span>↗</span></a>
+  </div>
+  <div class="banner-art" aria-hidden="true">
+    <div class="sun"></div><div class="hill hill-back"></div><div class="hill hill-front"></div>
+    <div class="plant plant-one"><i></i><b></b><span></span></div>
+    <div class="plant plant-two"><i></i><b></b><span></span></div>
+    <div class="plant plant-three"><i></i><b></b><span></span></div>
+  </div>
+  <div class="banner-orb orb-one"></div><div class="banner-orb orb-two"></div>
+</section>
+
+<div class="section-heading">
+  <div><div class="eyebrow">YOUR WORKSPACE</div><h2>Dashboard overview</h2><p class="section-subtitle">Two connected tools for agricultural insight.</p></div>
+  <div class="date-chip"><span>◷</span> Historical data · 1993–2014</div>
+</div>
+
+<section class="stats-grid">
+  <article class="stat-card"><div class="stat-top"><span class="stat-icon green">↗</span><span class="stat-tag">MODULE 01</span></div><p class="stat-label">Production analysis</p><h3>Historical trends</h3><p class="stat-foot">Estimate production from the supplied annual dataset.</p></article>
+  <article class="stat-card"><div class="stat-top"><span class="stat-icon amber">⌕</span><span class="stat-tag">MODULE 02</span></div><p class="stat-label">Visual field analysis</p><h3>Crop & weed AI</h3><p class="stat-foot">{% if detector_ready %}Detection model available{% else %}Requires trained YOLO model{% endif %}</p></article>
+  <article class="stat-card"><div class="stat-top"><span class="stat-icon blue">◷</span><span class="stat-tag">DATA SOURCE</span></div><p class="stat-label">Agriculture records</p><h3>Annual observations</h3><p class="stat-foot">National historical categories from the provided CSV.</p></article>
+</section>
+
+<section class="module-grid">
+  <article class="panel prediction-panel" id="production">
+    <div class="panel-header"><div class="module-symbol green">01</div><div><div class="eyebrow">MODULE 01</div><h2>Crop production prediction</h2></div><span class="pill {% if model_ready %}pill-success{% else %}pill-muted{% endif %}">{% if model_ready %}Model ready{% else %}Setup required{% endif %}</span></div>
+    <p class="panel-description">Choose a production category and year to generate a model-based estimate.</p>
+    {% if model_ready %}
+    <form action="{{ url_for('predict_production') }}" method="post" class="prediction-form">
+      <div class="form-field"><label for="category">Production category</label><select id="category" name="category" required>{% for item in categories %}<option value="{{ item }}">{{ item }}</option>{% endfor %}</select></div>
+      <div class="form-field"><label for="year">Target year</label><input id="year" type="number" name="year" min="1993" max="2035" value="2014" required><small>Available range: 1993–2035</small></div>
+      <button class="button button-primary full-button" type="submit">Generate estimate <span>→</span></button>
+    </form>
+    {% else %}
+    <div class="empty-state"><span class="empty-icon">↗</span><strong>Train your production model</strong><p>Run the preprocessing and training scripts from your project terminal.</p><code>python preprocess.py</code><code>python train_model.py</code></div>
+    {% endif %}
+    <div class="panel-note"><span>ⓘ</span><p>Predictions for years beyond 2014 are extrapolations, not official forecasts.</p></div>
+  </article>
+
+  <article class="panel detection-panel">
+    <div class="panel-header"><div class="module-symbol amber">02</div><div><div class="eyebrow">MODULE 02</div><h2>Crop & weed detection</h2></div><span class="pill {% if detector_ready %}pill-success{% else %}pill-muted{% endif %}">{% if detector_ready %}Model ready{% else %}Setup required{% endif %}</span></div>
+    <p class="panel-description">Upload a field image to inspect it with your trained crop/weed detection model.</p>
+    <div class="upload-illustration"><div class="scan-frame"><span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span><div class="leaf-shape leaf-a"></div><div class="leaf-shape leaf-b"></div><div class="scan-line"></div><span class="scan-label">FIELD IMAGE</span></div></div>
+    <a class="button button-dark full-button" href="{{ url_for('weed_detection') }}">Open image analysis <span>→</span></a>
+    {% if not detector_ready %}<div class="panel-note"><span>ⓘ</span><p>A labeled YOLO image dataset and trained model are required before detections can be produced.</p></div>{% endif %}
+  </article>
+</section>
+
+<section class="panel evaluation-panel">
+  <div class="evaluation-heading"><div><div class="eyebrow">MODEL PERFORMANCE</div><h2>Production model evaluation</h2><p class="section-subtitle">Metrics calculated on a time-based holdout from your dataset.</p></div><span class="evaluation-mark">◎</span></div>
+  {% if metrics %}
+  <div class="metrics-grid">
+    <div class="metric"><span>Mean absolute error</span><strong>{{ "%.4f"|format(metrics.get("MAE", 0)) }}</strong><small>MAE · source units</small></div>
+    <div class="metric"><span>Root mean squared error</span><strong>{{ "%.4f"|format(metrics.get("RMSE", 0)) }}</strong><small>RMSE · source units</small></div>
+    <div class="metric"><span>R-squared</span><strong>{{ "%.4f"|format(metrics.get("R2", 0)) }}</strong><small>R² · holdout score</small></div>
+  </div>
+  {% else %}<div class="empty-inline">Evaluation metrics will appear here after model training.</div>{% endif %}
+</section>
+<section class="data-notice"><span class="notice-icon">i</span><div><strong>About this dataset</strong><p>The supplied Department of Agriculture and Cooperation CSV contains national historical categories and annual values. It does not consistently include state, district, production cost, or crop variety details.</p></div></section>
+{% endblock %}

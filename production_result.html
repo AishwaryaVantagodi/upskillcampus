@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Production estimate{% endblock %}
+{% block breadcrumb %}Production estimate{% endblock %}
+{% block content %}
+<div class="page-intro"><div class="eyebrow">MODULE 01 · RESULTS</div><h1>Production estimate</h1><p>Review the model output for your selected category and year.</p></div>
+<section class="panel result-panel">
+  <div class="result-top"><span class="result-icon">↗</span><span class="pill {% if future %}pill-warning{% else %}pill-success{% endif %}">{% if future %}Extrapolated estimate{% else %}Historical-range estimate{% endif %}</span></div>
+  <div class="result-category">{{ category }}</div><div class="result-year">Target year <strong>{{ year }}</strong></div>
+  <div class="result-value">{{ value }} <span>{{ unit }}</span></div>
+  <div class="result-divider"></div>
+  <div class="result-details"><div><small>Selected category</small><strong>{{ category }}</strong></div><div><small>Prediction year</small><strong>{{ year }}</strong></div><div><small>Output unit</small><strong>{{ unit }}</strong></div></div>
+  {% if future %}<div class="warning-box"><strong>Interpret with caution</strong><p>This year is beyond the source dataset's latest year. The result is a simple model extrapolation and is not an official or validated forecast.</p></div>{% else %}<div class="info-box">Compare this estimate with the recorded value for the same category and year before drawing conclusions.</div>{% endif %}
+  <a class="button button-primary" href="{{ url_for('home') }}">← Back to dashboard</a>
+</section>
+{% endblock %}

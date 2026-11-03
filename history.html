@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Activity history{% endblock %}
+{% block breadcrumb %}Activity history{% endblock %}
+{% block content %}
+<div class="page-intro"><div class="eyebrow">WORKSPACE RECORDS</div><h1>Activity history</h1><p>Review recent production estimates and completed image detections.</p></div>
+<section class="panel history-panel"><div class="panel-header"><div><div class="eyebrow">MODULE 01</div><h2>Production predictions</h2></div><span class="pill pill-muted">{{ production|length }} recent records</span></div>
+{% if production %}<div class="table-wrap"><table><thead><tr><th>Production category</th><th>Year</th><th>Estimate</th><th>Unit</th><th>Created</th></tr></thead><tbody>{% for row in production %}<tr><td>{{ row.category }}</td><td>{{ row.year }}</td><td class="number-cell">{{ "%.4f"|format(row.predicted_production) }}</td><td>{{ row.unit }}</td><td>{{ row.created_at }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty-state"><span class="empty-icon">◷</span><strong>No prediction history yet</strong><p>Your saved production estimates will appear here.</p><a class="button button-primary" href="{{ url_for('home') }}">Create an estimate</a></div>{% endif %}</section>
+<section class="panel history-panel"><div class="panel-header"><div><div class="eyebrow">MODULE 02</div><h2>Image detection history</h2></div><span class="pill pill-muted">{{ detections|length }} recent records</span></div>
+{% if detections %}<div class="table-wrap"><table><thead><tr><th>Original file</th><th>Result file</th><th>Created</th></tr></thead><tbody>{% for row in detections %}<tr><td>{{ row.original_filename }}</td><td>{{ row.result_filename or "No result" }}</td><td>{{ row.created_at }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty-inline">No successful image detections have been recorded yet.</div>{% endif %}</section>
+{% endblock %}
